@@ -68,9 +68,9 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  -- The 'SELECT WHERE' keyword allows the query writer to select the conditions on columns for the rows to be returned.
  -- The syntax for using conditioning is shown below
  
- SELECT COUNT (column_name) 
+ SELECT COUNT (column_1, column_2) 
  FROM table_name
- WHERE conditions;
+ WHERE condition1 OR condition2 OR condition3;
  
  -- Example 1:
  SELECT COUNT (rental_rate) 
@@ -80,7 +80,7 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  -- Example 2:
  SELECT (film_name) 
  FROM film
- WHERE film_name = 'Desperado'; -- This selects all the rows of 'film_name' column where the value of 'film_name' is 'Desperado'.
+ WHERE film_name = 'Desperado'; -- This returns all the rows of 'film_name' column where the value of 'film_name' is 'Desperado'. Case sensitivity applies.
  /*
  Comparison operators:
  < less than
@@ -96,6 +96,11 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  SELECT COUNT (rental_rate) 
  FROM film
  WHERE rental_rate > 1 AND rental_rate < 4; -- This counts all the rows of the 'rental_rate' column where the value of 'rental-rate' is greater than 1 and lesser than 4.00.
+ 
+ -- Example 4:
+ SELECT * -- For some reason, when 'SELECT' is the only keyword, postgreSQL complains if the asterisk is placed in parenthesis. 
+ FROM film
+ WHERE rental_rate > 1 AND release_date = 2006; -- This returns all the rows of the 'film' table where the value of 'rental-rate' is greater than 1 and the 'release_date' is 2006.
  
  
  
