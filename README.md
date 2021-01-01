@@ -1,2 +1,3 @@
 # SQL-Repository
-An easily accessible SQL syntax repository
+An easily accessible SQL syntax repository.
+This is a repository for the 'Structured Query Language (SQL)' syntax. Very essential information on frequently used and easily forgettable SQL syntax concepts are featured here. This is not a functional program and should not be run directly with an IDE. Rather, it may be opened with a text editor like 'Notepad++' or the likes. The repository would be updated from time to time. Concepts that may be missing can be pointed out for inclusion.  Note: This is not a learning guide for absolute beginners of SQL. It is just more like a reference of important concepts for those who are a bit more advanced with SQL.
