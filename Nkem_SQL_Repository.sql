@@ -250,14 +250,37 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  
  -- The 'GROUP BY' operator allows the analyst to perform a grouping (by likely aggregating) of data based on a category.
  -- The general syntax can be shown below:
- SELECT category_column, AGG(data_col)
+ SELECT category_column1, category_column2, AGG(data_col)
  FROM specified_table
- GROUP BY category_column; -- Where 'AGG' is a specified aggregate function
+ GROUP BY category_column1, category_column2; -- Where 'AGG' is a specified aggregate function
  
  -- An example can be shown below:
+ 
+ -- Example 1:
  SELECT (rating), SUM(replacement_cost) 
  FROM film
  GROUP BY rating; -- Here the entire database is grouped based on the different rating categories and the sum of all the 'replacement_cost' values for those categories is returned as a table.
+ 
+ -- Example 2:
+ SELECT (rating), SUM(replacement_cost) 
+ FROM film
+ WHERE rating != 'G'
+ GROUP BY rating; -- Here some of the database is grouped based on the different rating categories and the sum of all the 'replacement_cost' values for those categories is returned as a table.
+ -- Unlike in the previous example, with the specification initiated by the 'WHERE' statement, rows with film rating as 'G' would be ignored.
+ -- NOTE that a 'GROUP BY' statement must only always follow either a 'FROM' or a 'WHERE' statement.
+ 
+ -- Example 3:
+ SELECT (rating, rental_rate), SUM(replacement_cost) 
+ FROM film
+ GROUP BY rating, rental_rate; 
+ -- Here the entire database is grouped first based on the different rating categories, then the pricing within those categories (rental_rate), and finally, the sum of all the 'replacement_cost' values for those categories is returned as a table.
+ 
+ -- Example 4:
+ SELECT (rating, rental_rate), SUM(replacement_cost) 
+ FROM film
+ GROUP BY rating, rental_rate
+ ORDER BY SUM(replacement_cost) ASC; -- Here the entire database is grouped first based on the different rating categories, then the pricing within those categories (rental_rate), and finally, the sum of all the 'replacement_cost' values for those categories is returned as a table.
+ -- The results are ordered by the values of the 'replacement_sum' parameter in ascending order.
  
  
  
