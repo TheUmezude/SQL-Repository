@@ -32,9 +32,11 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  
  
  
- ------------------------------------------------------------------------------------------- SQL Syntaxing -------------------------------------------------------------------------------------------
+ ------------------------------------------------- SQL Syntaxing ---------------------------------------------------------
  
- 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'SELECT' keyword ------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
  -- The 'SELECT' keyword is the most common keyword used in SQL for retrieving information from a table. 'SELECT' is combined with other statement keywords to perform various complexity queries.
  -- NOTE that a Database may contain several tables with their respective rows and columns.
  -- A semi-colon at the end of a query line is used to denote the end of the query. It is good practice to include this always.
@@ -45,15 +47,27 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  SELECT column_1, column_4 FROM table_1; -- Grabbing data from two columns for one specified table.
  
  SELECT * FROM table_1; -- Grab data from all the columns in the specified table
-------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+
+
+
  
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'SELECT DISTINCT' keyword ---------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
  
  -- The 'SELECT DISTINCT' keyword is used to get the unique information from a column of a table.
  -- It is used especially if there may be multiple entries of that exact same information.
  
  SELECT DISTINCT column_name FROM table_name; -- To get the unique or distinct information from a 'column_name' in 'table_name'.
- -------------------------------------------------------------------------------------------------------------------------------------------------------------
- 
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'SELECT COUNT' keyword -----------------------------------------------------------
+ ---------------------------------------------------------------------------------------------------------------------------------------
  
  -- The 'SELECT COUNT' keyword is used to get the total number of rows from a particular column in a table.
  -- Note that 'COUNT' is a type of aggregate function.
@@ -63,8 +77,14 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  
  SELECT COUNT (DISTINCT rental_rate) FROM film; -- To query the total number of distinct value rental_rate information in the specified database table, 'film'.
  SELECT COUNT (DISTINCT (rental_rate)) FROM film; -- Same as above, just with extra parenthesis.
- ---------------------------------------------------------------------------------------------------------------------------------------------------------------
  
+ 
+ 
+ 
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'SELECT WHERE' keyword ------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
  
  -- The 'SELECT WHERE' keyword allows the query writer to select the conditions on columns for the rows to be returned.
  -- The syntax for using conditioning is shown below
@@ -103,8 +123,14 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  SELECT * -- For some reason, when 'SELECT' is the only keyword, postgreSQL complains if the asterisk is placed in parenthesis. 
  FROM film
  WHERE rental_rate > 1 AND release_date = 2006; -- This returns all the rows of the 'film' table where the value of 'rental-rate' is greater than 1 and the 'release_date' is 2006.
- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  
+ 
+ 
+ 
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'ORDER BY' keyword ----------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
  
   -- The 'ORDER BY' keyword is used to sort the organization of rows based on a column value (ascending or descending order).
  SELECT (column1, column2) 
@@ -122,8 +148,14 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  SELECT store_id, first_name, last_name FROM customer
  ORDER BY store_id DESC, first_name ASC; -- This returns the columns 'store_id', 'first_name' and 'last_name' from the table 'customer'.
  -- The columns are returned sorted in descending order for 'store_id' and ascending order for 'first_name' -- Precedence flows from left to right.
- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  
+ 
+ 
+ 
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'LIMIT' keyword -------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
  
  -- The 'LIMIT' keyword allows for the number of rows returned to be limited -- such that the entire rows in the database associated with a particular query aren't returned.
  -- 'LIMIT' is usually combined with the 'ORDER' statement and usually is the last command to be executed.
@@ -142,8 +174,14 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
 -- Example 3:
  SELECT * FROM payment
  LIMIT 1; -- An interesting way to get the general layout of a particular table, without printing out the entire database. Here, just the first row is returned.
- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  
+ 
+ 
+ 
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'BETWEEN' keyword -----------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
  
  -- The 'BETWEEN' keyword is used for getting results within a specified range. Can be used in place of combined comparison and logical operators. For instance:
  -- value >= low AND value <= high -- can be rewritten as -- value BETWEEN low AND high
@@ -159,8 +197,16 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  SELECT COUNT(*) FROM payment
  WHERE payment_date BETWEEN '2007-02-01' AND '2007-02-15'; -- Returns the total number of entries in the 'payment' table where the date exist between the specified dates.
  -- NOTE that unfortunately, the date system on SQL only goes up to the midnight time-stamp, so if time is above 00:00, it won't register, so always pay extra attention.
- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  
+ -- ** NOTE, to filter out just the dates and ignore time-stamps in cases where date and time-stamps are shown, you may call the function 'DATE()'
+ 
+ 
+ 
+ 
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'IN' operator ---------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
  
  -- The 'IN' operator may be used to create a condition that checks to see if a value is included in a list of multiple entries.
  
@@ -172,8 +218,14 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  -- Example 2:
  SELECT * FROM customer
  WHERE first_name NOT IN ('Jared', 'Linda', 'Susan', 'Maria') -- This returns all entries (rows & columns) where the 'first_name' column has NO entries similar to the initialized strings.
- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  
+ 
+ 
+ 
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'LIKE' operator -------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
  
  -- The 'LIKE' operator allows for pattern-matching queries to be made on a database -- for instance, finding all the customers whose names begin with 'A', or whose email addreses end with '@yahoo.com'
  -- The matching however requires the use of 2 wildcard characters. The percent (%) that matches any sequence of characters or the underscore (_) that matches any single character.
@@ -220,8 +272,14 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  -- Example 7:
  SELECT * FROM film
  WHERE title NOT LIKE '__be%'; -- Returns the opposite of the results gotten in Example 6.
- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  
+ 
+ 
+ 
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ AGGREGATE FUNCTIONS -------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
  
  -- Aggregate functions are functions that take in a lot of data and return a single output. Examples of aggregate function in SQL include:
  AVG() -- To return the average of a set of values. value is a float and 'ROUND()' ay be used to set approximation precision.
@@ -245,10 +303,16 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  
  -- Example 3:
  SELECT SUM(replacement_cost) FROM film; -- Returns the total sum of all the parameters in the 'replacement_cost' column of the 'film' table.
- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  
  
- -- The 'GROUP BY' operator allows the analyst to perform a grouping (by likely aggregating) of data based on a category.
+ 
+ 
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'GROUP BY' call -------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ 
+ -- The 'GROUP BY' call allows the analyst to perform a grouping (by likely aggregating) of data based on a category.
  -- The general syntax can be shown below:
  SELECT category_column1, category_column2, AGG(data_col)
  FROM specified_table
@@ -281,6 +345,61 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  GROUP BY rating, rental_rate
  ORDER BY SUM(replacement_cost) ASC; -- Here the entire database is grouped first based on the different rating categories, then the pricing within those categories (rental_rate), and finally, the sum of all the 'replacement_cost' values for those categories is returned as a table.
  -- The results are ordered by the values of the 'replacement_sum' parameter in ascending order.
+ 
+ 
+ 
+ 
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'HAVING' clause -------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ 
+ -- The 'HAVING' clause allows you to perform a filter on the aggregate function. 
+ -- In the previous example where aggregate functions are used alongside the 'GROUP BY' function, no filter can be performed on the columns being aggregated. The filter is only applicable to the column data outside the aggregate function. -- The 'HAVING' clause changes this.
+ -- An example is shown below:
+ 
+ -- Example 1:
+ SELECT (rating, rental_rate), SUM(replacement_cost) 
+ FROM film
+ WHERE rating != 'G'
+ GROUP BY rating, rental_rate
+ HAVING SUM(replacement_cost) BETWEEN 1000 AND 1300
+ ORDER BY SUM(replacement_cost) ASC; -- Here, the results are first grouped based on the rating for all ratings not equal to 'G' (Filter applied here with 'WHERE'), the 'ratings' are further grouped based on values in 'rental_rate', the results from this are then subjected to a filter on the aggregate (with the 'HAVING' clause', where only results with an aggregate between 1000 and 1300 are returned.
+ -- NOTE that SQL processes lines of code in sequence, hence the position of particular function calls is very important. The 'WHERE' keyword was placed before the 'GROUP BY' call for the initial operation on the 'rating' column. the 'HAVING' clause was placed immediately below the 'GROUP BY' call, because its supposed to perform the operation on the results of the aggregate function.
+ -- NOTE also, when using the 'HAVING' clause, it should be used alongside the aggregate function call on a column, and not just the column itself.
+ 
+ -- Example 2:
+ SELECT (customer_id, staff_id), SUM(amount) 
+ FROM payment
+ WHERE staff_id = 2
+ GROUP BY customer_id, staff_id
+ HAVING SUM(amount) > 100 -- This returns the 'customer_id' of customers who have spent above $100 in total payment transactions with the staff member with 'staff_id' of 2.
+ 
+ -- Another way to write this, in such a way that only the 'customer_id' column shows (without being intersected with the 'staff_id') could be:
+ SELECT (customer_id), SUM(amount) 
+ FROM payment
+ WHERE staff_id = 2
+ GROUP BY customer_id
+ HAVING SUM(amount) > 100 -- This returns similar results as the example shown prior, above. 
+ -- Notice that despite the fact that 'staff_id' 2 didn't appear around either the 'SELECT' or 'GROUP BY' keyword, it could still be applied for initializing the filter.
+ 
+ 
+ 
+ 
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------ The 'AS' clause -----------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ 
+ -- The 'AS' clause can be used for creating an alias of a column on a table. Its syntax is shown below:
+ SELECT column1 AS new_column
+ FROM table1;
+ -- Another:
+ SELECT SUM(column1) AS new_column
+ FROM table1; -- Think of it as a way to rename tables
+ 
+ 
+ 
  
  
  
