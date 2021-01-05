@@ -56,6 +56,7 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  
  
  -- The 'SELECT COUNT' keyword is used to get the total number of rows from a particular column in a table.
+ -- Note that 'COUNT' is a type of aggregate function.
  
  SELECT COUNT (column_name) FROM table_name; -- To query the total number of rows in the specified column of the table.
  SELECT COUNT (*) FROM table_name; -- Query total number of rows from the columns of the specified table - Should typically be same like the above sample
@@ -171,6 +172,93 @@ It is generally good practice to capitalize the keywords used in an SQL query, a
  -- Example 2:
  SELECT * FROM customer
  WHERE first_name NOT IN ('Jared', 'Linda', 'Susan', 'Maria') -- This returns all entries (rows & columns) where the 'first_name' column has NO entries similar to the initialized strings.
+ -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 
+ -- The 'LIKE' operator allows for pattern-matching queries to be made on a database -- for instance, finding all the customers whose names begin with 'A', or whose email addreses end with '@yahoo.com'
+ -- The matching however requires the use of 2 wildcard characters. The percent (%) that matches any sequence of characters or the underscore (_) that matches any single character.
+ -- Examples are shown below.
+ 
+ -- Example 1: 
+ SELECT * FROM film
+ WHERE title LIKE 'Ch%'; -- This returns all the columns of the 'film' table but only returns the rows associated with a 'title' column beginning with 'Ch'.
+ 
+ -- Example 2:
+ SELECT * FROM film
+ WHERE title LIKE '%its'; -- This returns all the columns of the 'film' table but only returns the rows associated with a 'title' column ending with 'its'.
+ 
+ -- NOTE the change in the position of the percent sign for instances of either beginning with or ending with.
+ -- NOTE also that the 'LIKE' keyword is case sensitive.
+ -- To avoid the case-sensitive requirement of the 'LIKE' keyword, 'ILIKE' may be used instead, as in the example below:
+ -- All the characters following after the specified character are referred to as 'wild-cards' as they could be any length and any arrangement of alphabets.
+ 
+ -- Example 3:
+ SELECT * FROM film
+ WHERE title ILIKE '%C'; -- Returns all the columns of the 'film' table but only returns the rows associated with a 'title' column ending with 'c' or 'C' (no case-sensitivity).
+ 
+ -- NOTE that you may mix-mash characters before and after the percent sign to indicate what the entry data should start and end with. -- For instance:
+ 
+ -- Example 4:
+ SELECT * FROM film
+ WHERE title LIKE 'Ap%e'; -- Returns all the columns of the 'film' table but only returns the rows associated with a 'title' column beginning with 'Ap' and ending with 'e' (case-sensitivity).
+ 
+ -- The 'Like' operator can also be used with an underscore (_), to get matching data with only a character difference (like movie sequels), such as Tarzan 1, Tarzan 2.
+ 
+ -- Example 5:
+ SELECT * FROM film
+ WHERE film_name ILIKE 'Fast & Furious _'; -- This would return all columns of the 'film' table but only returns the rows that have 'Fast & Furious' followed by one extra character.
+ 
+ -- You can use multiple underscores to match the multiple characters after the initialized string.
+ -- You can combine underscores with percent signs for more intricate searches. For instance:
+ 
+ -- Example 6:
+ SELECT * FROM film
+ WHERE title ILIKE '__be%'; -- Returns all the columns of the 'film' table but only returns rows associated with a 'title' column starting with two wildcard characters (2 underscores), a 'be' character set, and then any other group of character number, arrangement and length.
+ 
+ -- As usual, you may also add the 'NOT' operator before the 'LIKE' operator to return results that deviate from the pattern. For instance:
+ 
+ -- Example 7:
+ SELECT * FROM film
+ WHERE title NOT LIKE '__be%'; -- Returns the opposite of the results gotten in Example 6.
+ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 
+ -- Aggregate functions are functions that take in a lot of data and return a single output. Examples of aggregate function in SQL include:
+ AVG() -- To return the average of a set of values. value is a float and 'ROUND()' ay be used to set approximation precision.
+ COUNT() -- To return a value that describes the number of times an occurrence takes place.
+ MAX() -- To return the maximum value out of a set of values
+ MIN() -- To return the minimum value out of a set of values
+ SUM() -- To return the total of a set of values.
+ 
+ -- You can only call aggregate functions after the 'SELECT' clause or 'HAVING' clause.
+ 
+ -- Example 1:
+ SELECT MIN(replacement_cost) FROM film; -- To return the minimum value in the 'replacement_cost' column of the 'film' table.
+ 
+ SELECT MAX(replacement_cost) FROM film; -- To return the maximum value in the 'replacement_cost' column of the 'film' table.
+ 
+ SELECT MAX(replacement_cost), MIN(replacement_cost) FROM film; -- To return the maximum and minumum values in the 'replacement_cost' column of the 'film' table. Note that a single value is returned.
+ 
+ -- Example 2:
+ SELECT ROUND(AVG(replacement_cost), 4) FROM film; -- To return the average of all the values in the 'replacement_cost' column of the 'film' table, rounded to 4 decimal places
+ -- NOTE that the general syntax when using the 'ROUND()' function is: ROUND(parameter, precision)
+ 
+ -- Example 3:
+ SELECT SUM(replacement_cost) FROM film; -- Returns the total sum of all the parameters in the 'replacement_cost' column of the 'film' table.
+ ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 
+ -- The 'GROUP BY' operator allows the analyst to perform a grouping (by likely aggregating) of data based on a category.
+ -- The general syntax can be shown below:
+ SELECT category_column, AGG(data_col)
+ FROM specified_table
+ GROUP BY category_column; -- Where 'AGG' is a specified aggregate function
+ 
+ -- An example can be shown below:
+ SELECT (rating), SUM(replacement_cost) 
+ FROM film
+ GROUP BY rating; -- Here the entire database is grouped based on the different rating categories and the sum of all the 'replacement_cost' values for those categories is returned as a table.
+ 
  
  
  
