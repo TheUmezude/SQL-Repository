@@ -61,6 +61,9 @@ SELECT * FROM table_1; -- Grab data from all the columns in the specified table
  
 SELECT DISTINCT column_name FROM table_name; -- To get the unique or distinct information from a 'column_name' in 'table_name'.
 
+-- NOTE that you cannot use the 'SELECT DISTINCT' keyword with the * operator, as you cannot be finding unique information in all the rows of all the columns of the table. 
+-- You should only use 'SELECT DISTINCT' with an actual column name from the table in question.
+
 
 
 
@@ -414,7 +417,8 @@ GROUP BY customer_id; -- With this, a 3rd party reader of the code would be able
  
 -- Joins are used to relate information between several tables. It is able to find informaton unique to a group of tables, or even combine several tables into one big table. There are different types of 'JOIN' operators: Inner Joins, Full Outer Joins, Left Outer Join, Right Join, UNION
 
------- Inner Joins 
+
+------ INNER JOINS 
 -- These are similar to intersections. The tables or table columns in question may be assumed to be a set that holds data, and performing an inner join on these sets, finds the information that exists in both the set parameters being considered here. The general syntax is shown below:
 SELECT * FROM TableA
 INNER JOIN TableB
@@ -439,7 +443,117 @@ INNER JOIN country
 ON city.country_id = country.country_id; -- This returns three columns. The first two columns are same first two columns from example 2; city.city = city (just a way of specifying which table it should be taking the column from -- useful in situations where tables being joined have some identical column names). The third column is from the country table (i.e country.last_update), and is specifically saying that the column 'last_update' should be taken from the table 'country'.
 
 -- NOTE that PostgreSQL would treat an uninitialized 'JOIN' keyword as an 'INNER JOIN'.
- 
+
+-- Example 4:
+SELECT customer.first_name, customer.last_name, customer.email, address.district FROM customer
+INNER JOIN address
+ON customer.address_id = address.address_id
+WHERE address.district = 'California'; -- Retrieving the names, and email addresses of customers in the database who live in distrit = California. The 'customer' table is intersected with the 'address' table, and a filter is performed to sift out the information for those resident in California.
+
+-- Example 5:
+-- Problem: A customer walks in and asks for all movies 'Nick Wahlberg' features in.
+-- In your database, you have a table called 'actor' which has columns for the first and last name of eahc actor, along with the actor id. 
+-- You have another table called 'film_actor' which has columns for the actor id and the film_id
+-- You have a final table called 'film' which has columns for film title, film ID, film description, release year, etc.
+-- We will be joinging three tables and extracting the information we need out of them.
+SELECT film.title, actor.first_name, actor.last_name FROM film_actor
+INNER JOIN actor
+ON film_actor.actor_id = actor.actor_id
+INNER JOIN film
+ON film_actor.film_id = film.film_id
+WHERE actor.first_name = 'Nick' AND actor.last_name = 'Wahlberg'; -- Here, a join statement was performed on another join statement. Basically we have three separate sets and tried to find the intersection on them.
+
+
+
+------ Outer Joins
+-- 'Outer joins' are a little more complex than 'Inner joins', they also are of three different forms: 'FULL OUTER JOIN', 'LEFT OUTER JOIN', 'RIGHT OUTER JOIN'. 
+
+------ FULL OUTER JOINS
+-- In 'Full Outer Joins', SQL combines all tables indicated in the join statements, and by the matching values in the indicated columns as well, The resulting table must incorporate every item of the individual tables, and can be as large as both tables rows added together (if there aren't any matching information at all).
+-- For cases where no information match between the two tables being joined, the area or aspect without the match would bear the 'NULL' data value.
+-- For 'FULL OUTER JOINS', the joiner table and the joining table can be interchanged.
+-- An example is shown below.
+
+-- Example 1:
+SELECT * FROM city
+FULL OUTER JOIN country
+ON city.country_id = country.country_id; -- Here, the 'city' and 'country' tables are being joined to each other. All the columns of both are being returned here, also, ALL the rows in both tables would be returned whether or not the row data in 'country_id' column match. For cases where the row data in the 'country_id' column do not match, the 'NULL' data value is printed out.
+-- Think of it like a union of both tables, where NULL values would be filled up if the specified column row data do not match.
+
+-- The 'FULL OUTER JOIN' can also be tweaked in-order to get the unique items in the tables being joined, such that any intersecting items are completely ignored. In- other words, it basically does the opposite of an intersection (INNER JOINS).
+-- Example 2:
+SELECT * FROM city
+FULL OUTER JOIN country
+ON city.country_id = country.country_id
+WHERE city.last_update IS null OR country.last_update IS null; -- This returns a table where the unique items for each of the joining tables is shown. In-other words, it only returns the rows of the 'city' table where there is no intersection for 'country_id' with the 'country' table -- all 'NULL' on the 'country' table side for the 'last_update' row data of the column, and only returns the rows of the 'country' table where there is no intersection for 'country_id' with the 'city' table -- all 'NULL' on the 'city' table side for the 'last_update' row data of the column. 
+
+-- NOTE that 'null' may be written as lower-case or upper-case 'NULL'.
+
+
+------ LEFT OUTER JOINS
+-- In 'LEFT OUTER JOINS', two tables are joined, but only the information on the joiner table (table with the FROM statement) is considered. In other words, it joins the two tables for only where there is a value on the joiner table.
+-- As a reuslt of the operating procedure for 'LEFT OUTER JOINS', the joiner and joining table positions cannot be interchanged, as this would yield different results.
+-- An example is shown below:
+
+-- Example 1:
+SELECT * FROM address
+LEFT OUTER JOIN country
+ON address.address_id = country.country_id; -- This returns a combined table for the places where there is a value on the joiner table, 'address', even if there is a NULL on the joining table.
+
+-- The 'LEFT OUTER JOIN' can also be tweaked to give items that only exist on the joiner table, and exclude the items on the joiner table that have relations on the joining table.
+-- An example is shown below:
+
+-- Example 2:
+SELECT * FROM address
+LEFT OUTER JOIN country
+ON address.address_id = country.country_id
+WHERE country.country_id IS null; -- This returns a combined table for the places where there is a value on ONLY the joiner table, 'address'. Items on the joiner table that have relation with items on the joining table are not returned.
+
+
+------ RIGHT OUTER JOINS
+-- 'RIGHT OUTER JOINS' are just opposite to the 'LEFT OUTER JOINS'.
+-- As a reuslt of the operating procedure for 'LEFT OUTER JOINS', the joiner and joining table positions cannot be interchanged, as this would yield different results.
+-- An example is shown below:
+
+-- Example 1:
+SELECT * FROM address
+RIGHT OUTER JOIN country
+ON address.address_id = country.country_id; -- This returns a combined table for the places where there is a value on the joining table, 'country', even if there is a NULL on the joiner table, 'address'.
+
+-- The 'RIGHT OUTER JOIN' can also be tweaked to give items that only exist on the joining table, and exclude the items on the joining table that have relations on the joiner table.
+-- An example is shown below:
+
+-- Example 2:
+SELECT * FROM address
+RIGHT OUTER JOIN country
+ON address.address_id = country.country_id
+WHERE address.address_id IS null; -- This returns a combined table for the places where there is a value on ONLY the joining table, 'country'. Items on the joining table that have relation with items on the joiner table are not returned.
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------- UNIONS ----------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
+
+-- 'UNIONS' are used to unify information from two tables where there is similarity -- basically pasting them on-top each other. 
+-- * For 'UNIONS' to work, the two tables being unified should have the same number of columns and same name on the columns.
+-- For instance, consider a table1 with names of staff and the amount they were paid for the first month, and another table2 with names of staff and the amount they were paid in the second month. The both tables can be unified under an assumed unique customer name, and then the 'GROUP BY' function call can be used to calculate the total payment made to the aforementioned staff. The 'ORDER BY' function call could also instead be called to order the information.
+-- The general syntax for 'UNION' is shown:
+SELECT * FROM payment_data_January
+UNION
+SELECT * FROM payment_data_February;
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------- ADVANCED SQL COMMANDS ---------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
+
+-- There are 4 main time data-types in SQL. These data types are; TIME (Contains only time info), DATE (Contains only date info), TIMESTAMP (Contains date and time info), TIMESTAMPTZ (Contains date, time and timezone info). 
  
  
  
