@@ -80,6 +80,12 @@ SELECT COUNT (*) FROM table_name; -- Query total number of rows from the columns
  
 SELECT COUNT (DISTINCT rental_rate) FROM film; -- To query the total number of distinct value rental_rate information in the specified database table, 'film'.
 SELECT COUNT (DISTINCT (rental_rate)) FROM film; -- Same as above, just with extra parenthesis.
+
+-- NOTE: If a database has more than one schema (A public schema and an internal schema (maybe called 'cd' in this case), to query the database with the 'SELECT' keyword, the tables would have the 'cd' schema in front of them.
+-- For example:
+SELECT * FROM cd.table_name1
+
+SELECT * FROM cd.another_table
  
  
  
@@ -554,7 +560,178 @@ SELECT * FROM payment_data_February;
 ----------------------------------------------------------------------------------------------------------------------------------------
 
 -- There are 4 main time data-types in SQL. These data types are; TIME (Contains only time info), DATE (Contains only date info), TIMESTAMP (Contains date and time info), TIMESTAMPTZ (Contains date, time and timezone info). 
+SHOW TIMEZONE -- Shows the timezone the particular database whas created in.
+SELECT NOW() -- Shows the current time, date and timezone information.
+SELECT TIMEOFDAY() -- Shows the current time, date and timezone information like in the prior, but this time, it shows it in string form for easier reading.
+SELECT CURRENT_TIME -- Shows just time and timezone information.
+SELECT CURRENT_DATE -- Shows just date information.
+
+EXTRACT() -- Allows you to extract the year, month, day, week or quarter information from a time stamp
+-- Example set1:
+SELECT EXTRACT(MONTH FROM NOW());
+SELECT EXTRACT(WEEK FROM NOW());
+SELECT EXTRACT(MINUTE FROM CURRENT_TIME);
+-- Example set2:
+SELECT EXTRACT(MONTH FROM last_update) 
+FROM actor; -- To extract the month information from the 'last_update' column of the 'actor' table
+
+SELECT EXTRACT(YEAR FROM last_update) AS specific_year
+FROM actor; -- To extract the year information from the 'last_update' column of the 'actor' table and rename it as 'specific_year'
+-- Example set3:
+SELECT COUNT(*)
+FROM payment
+WHERE EXTRACT(dow FROM payment_date) = 1; -- To extract the number of payments that occured on a Monday - 0 for Sunday, 1 for Monday, 2 for Tuesday, 3 for Wednesday etc.
+
+
+AGE() -- Calculates and returns the current age given a timestamp
+-- Example set1:
+SELECT AGE(last_update) AS time_since_update
+FROM actor; -- This returns the total time passed since the timestamp on the 'last_update' column, i.e, today's date minus the date on the timestamp.
+
+SELECT EXTRACT(YEAR FROM AGE(last_update)) AS year_since_update
+FROM actor; -- Combining the 'Extract' function with the 'Age' function to get only the number of years since the last update.
+
+
+TO_CHAR() -- To convert data types to text. - Can be applied for timestamp formatting or more.
+-- Examples:
+SELECT TO_CHAR(NOW(), 'dd-mm-yyyy'); -- Converts the present time to the specified format.
+
+SELECT TO_CHAR(125, '999'); -- Converts the integer value to a string form.
+
+SELECT TO_CHAR(payment_date, 'Month-YYYY')
+FROM payment; -- Converts the timestamp in 'payment_date' column from 'payment' table to the specified formatting.
+
+SELECT TO_CHAR(payment_date, 'Month of YYYY')
+FROM payment; -- Converts the timestamp in 'payment_date' column from 'payment' table to the specified formatting with the 'of' between -- such as: 'November of 2020'.
+
+-- NOTE that there are more detailed documentations in the PostgreSQL documentation for the highlighted SQL commands.
+
+
+
+------ MATHEMATICAL OPERATORS 
+-- There are several mathematical operators available with the SQL syntax. Most of these mathematical operators can be found in the documentation page for Postgre SQL.
+-- Examples:
+SELECT rental_rate/replacement_cost AS Fraction
+FROM film; -- Dividing the row data in 'rental_rate' column by those in 'replacement_cost', and saving the result under a new column 'Fraction'.
+-- You can directly perform mathematical operations by calling the columns against themselves.
  
+SELECT (rental_rate + replacement_cost) * 100
+FROM film; -- Adding the row data in 'rental_rate' to that in 'replacement_cost', and saving the result under a new column 'Fraction'.
+
+
+------ STRING FUNCTIONS AND OPERATORS
+-- There are several string functions and operators available with the SQL syntax. Most of these can be found in the documentation page for Postgre SQL.
+-- Examples:
+SELECT length(title)
+FROM film; -- To get the length of the string data in the rows of the column 'title' -- This could also be done with the UTF-8 encoding if you have non english string characters.
+
+SELECT first_name || ' ' || last_name AS Full_Name
+FROM customer; -- To concatenate the string data in the 'first_name' column of the 'customer' table to a white space, and then to the string data in the 'last_name' column. The results are saved under the 'Full_Name' column.
+
+SELECT UPPER(first_name) || ' ' || UPPER(last_name) AS Full_Name
+FROM customer; -- Does the same thing as the sample above, just that the names are returned in all capital form.
+
+SELECT LEFT(first_name || last_name, 9) || '@mycompany.com' AS Created_Emails
+FROM employees; -- This creates company custom email addresses for employees by concatenating the first name data from the 'first_name' column, the last name data from the 'last_name' column, cutting to ensure the totalt characters are not more than 9 letters in total with the 'LEFT' function, and then concatenating the '@mycompany.com' to the string. The results are saved in a new column titled 'Created_Emails'.
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------- SUB-QUERY -------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
+
+-- Sub-Query allows you perform more complex queries. Essentially, a query is performed on the results of another query.
+-- The syntax is usually straightforward, and involves two 'SELECT' statements.
+-- Examples are shown below:
+
+-- Example 1:
+SELECT customer_id, amount AS Above_Average_amount, payment_date 
+FROM payment
+WHERE amount > (SELECT AVG(amount)
+			   FROM payment); 
+-- Here we are performing a query within another query. The first query is to return the row data in the columns, 'customer_id', 'amount' as 'Above_Average_amount' and 'payment_date'.
+-- Second query is querying the first query using the filter 'WHERE', to sift out and return the earlier requested query for only the rows with 'amount' column row data greater than the average of all the amounts from the 'payment' table, still.
+-- NOTE that since the subquery is acting on the main query, the subquery is performed first, and affects the eventual result of the main query.
+
+-- Example 2: - Performing a subquery alongside an 'IN' statement.
+-- The 'IN' operator is used in cases when the subquery would return more than a single value. In the first example, the subquery would be returning a single value, whereas, in the second example, the subquery would be returning a pool of values, hence, we have to peer 'IN'.
+SELECT student, grade
+FROM test_scores
+WHERE student IN (SELECT student
+				  FROM honor_roll_table);
+-- Again, two queries are performed at the same instance.
+-- The subquery selects the data in the 'student' column that exists in the 'honor_roll_table', and then moves on to select the data in the 'grade' column for those students. It returns two columns for 'student' and 'grade' for any student who appears in the data for the 'honor_roll_table'.
+
+-- Example 3:
+SELECT DISTINCT(film.film_id), film.title
+FROM film
+INNER JOIN inventory
+ON film.film_id = inventory.film_id
+WHERE inventory.film_id IN (SELECT inventory.film_id 
+							FROM rental
+							INNER JOIN inventory
+							ON inventory.inventory_id = rental.inventory_id
+							WHERE return_date BETWEEN '2005-05-29' AND '2005-05-30');
+-- This is a very interesting example of subqueries with advanced SQL commands.
+-- Here we have 3 tables, 'film', 'inventory' and 'rental'. The 'film' table and 'inventory' table have row data in a column called 'film_id', the 'rental' table does not have this.
+-- The 'inventory' and 'rental' table have data in a column called 'inventory_id'. 
+-- So now, we are to write a Query that returns the film titles of all movies that were rturned to the rental store between the dates 2005-05-29 and 2005-05-30. 
+-- To do this we write a query inside a query. The subquery joins the 'inventory' table to the 'rental' table for same inventory_id values, and then it filters from the combined table, the 'film_id' for the films returned between the aforementioned dates.
+-- The main query then joins the 'film' table to the 'inventory' table at the points where the both tables have matching 'film_id', but filtered such that the only values from the returned 'previously joined tables (inventory and rental) exist.
+
+-- Example 4: Subquery with 'EXISTS()' function
+-- The 'EXISTS()' function is generally used to check if any rows are returned with the subquery.
+SELECT first_name, last_name
+FROM customer
+WHERE EXISTS(SELECT *
+			FROM payment
+			WHERE payment.customer_id = customer.customer_id
+			AND payment.amount > 11); 
+-- Using the 'EXISTS()' function to return the 'first_name' and 'last_name' columns for the 'customer' table if there is such an existence from the pool generated from where 'payment.customer_id' equals 'customer.customer_id' and 'payment.amount' is above 11.
+-- This particular example is interesting because it doesn't need to be written in this way. It may be written differently, without the 'EXISTS()' function as:
+SELECT customer.first_name, customer.last_name 
+FROM payment
+INNER JOIN customer
+ON payment.customer_id = customer.customer_id
+WHERE payment.amount > 11;
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------- SELF-JOIN -------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
+
+-- A 'SELF-JOIN' is a query in which a table is joined to itself -- usually for comparing values in a column of rows within the same table.
+-- When using a 'SELF-JOIN', it is necessary to use an alias for the table, in-order to avoid ambiguity with table names.
+-- The syntax is shown below:
+
+SELECT tableA.col, tableB.col
+FROM table1 AS tableA
+JOIN table1 AS tableB -- Recall that Postgre treats an uninitialized 'JOIN' as 'INNER JOIN'.
+ON tableA.some_col = tableB.other_col
+
+-- This is particularly useful if for instance, there exists a table 'EMPLOYEES' containing three columns, 'employee_name', 'employee_id', 'pairing_id', and the data contained in the 'pairing_id' column corresponds to another employees 'employee_id'.
+-- In other words, employees are being paired together. Originally the table would only show the ID of the employee they are being paired to. Hence, if you want the employees to know the names of who they are being paired to, you could use the 'SELF-JOIN' syntax to essentially return two columns with one containing 'employee_name' , and another containing the 'pair_name' for the employee they are paired to -- based on ID.
+-- It is shown below:
+
+-- Example 1:
+SELECT emp.name, pair.name
+FROM employees AS emp
+INNER JOIN employees AS pair
+ON emp.employee_id = pair.pair_id
+
+-- Example 2:
+SELECT film1.title, film2.title
+FROM film AS film1
+INNER JOIN film AS film2
+ON film1.length = film2.length; -- Here, aliases of the 'film' table are created as 'film1' and 'film2'.
+-- they are then joined together at the point where the alias 'film1' has a length equal to the alias 'film2'. You can think of it as selecting one data from 'film1', looping through and assigning datat that matches from the 'film2' table for as many as exist under the specified condition. 
+				
+
  
  
  
