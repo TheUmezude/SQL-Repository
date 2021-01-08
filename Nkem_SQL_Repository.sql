@@ -411,6 +411,12 @@ FROM table1; -- Think of it as a way to rename tables -- renaming helps for read
 SELECT customer_id, SUM(amount) AS total_transactions
 FROM payment
 GROUP BY customer_id; -- With this, a 3rd party reader of the code would be able to tell that when the two columns appear side by side, the aggregated 'amount' column would be represented by 'total_transactions'. 
+
+-- Example 2:
+SELECT facid, SUM(slots) AS total_booked_slots
+FROM cd.bookings
+GROUP BY facid; -- Returns the column of facilities ID number, 'facid', and the total number (aggregated) of booked slots for the specific facility as 'total_booked_slots' column.
+
 -- NOTE that, though the 'amount' column has now been renamed to 'total_transactions', if additional operations are to be performed on the values within, with a 'HAVING' statement for instance, the operations still have to be done in consideration of the original name of the columns.
  
  
@@ -468,6 +474,16 @@ ON film_actor.actor_id = actor.actor_id
 INNER JOIN film
 ON film_actor.film_id = film.film_id
 WHERE actor.first_name = 'Nick' AND actor.last_name = 'Wahlberg'; -- Here, a join statement was performed on another join statement. Basically we have three separate sets and tried to find the intersection on them.
+
+-- Example 6:
+SELECT name, starttime 
+FROM cd.facilities
+INNER JOIN cd.bookings
+ON cd.facilities.facid = cd.bookings.facid
+WHERE cd.bookings.starttime >= '2012-09-21'
+AND cd.bookings.starttime < '2012-09-22'
+AND cd.facilities.name ILIKE '%Tennis Court%';
+-- This returns the facility name 'name' and facility start times 'starttime' for the 'Tennis Court' facility open on the 21st of September, 2012. 
 
 
 
@@ -604,6 +620,12 @@ FROM payment; -- Converts the timestamp in 'payment_date' column from 'payment' 
 SELECT TO_CHAR(payment_date, 'Month of YYYY')
 FROM payment; -- Converts the timestamp in 'payment_date' column from 'payment' table to the specified formatting with the 'of' between -- such as: 'November of 2020'.
 
+-- Example application:
+SELECT memid, firstname, surname, joindate
+FROM cd.members
+WHERE (SELECT TO_CHAR(joindate, 'mm')) >= '09' AND (SELECT TO_CHAR(joindate, 'yyyy')) >= '2012';
+-- To return the member ID ('memid'), 'firstname', 'surname' and 'joindate' of members of a club who joined after September, 2012. 
+
 -- NOTE that there are more detailed documentations in the PostgreSQL documentation for the highlighted SQL commands.
 
 
@@ -617,6 +639,8 @@ FROM film; -- Dividing the row data in 'rental_rate' column by those in 'replace
  
 SELECT (rental_rate + replacement_cost) * 100
 FROM film; -- Adding the row data in 'rental_rate' to that in 'replacement_cost', and saving the result under a new column 'Fraction'.
+
+-- NOTE to always be careful when dealing with fractions. Divide by floating point numbers if you want to get values for the fraction division operations.
 
 
 ------ STRING FUNCTIONS AND OPERATORS
@@ -730,11 +754,175 @@ FROM film AS film1
 INNER JOIN film AS film2
 ON film1.length = film2.length; -- Here, aliases of the 'film' table are created as 'film1' and 'film2'.
 -- they are then joined together at the point where the alias 'film1' has a length equal to the alias 'film2'. You can think of it as selecting one data from 'film1', looping through and assigning datat that matches from the 'film2' table for as many as exist under the specified condition. 
-				
 
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------- CREATING DATABASES AND TABLES ----------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
+
+------ DATA TYPES
+-- BOOLEAN: True, False
+-- CHARACTER: char, varchar & text
+-- NUMERIC: integer, floating-point number
+-- TEMPORAL: date, time, timestamp, interval
+-- UUID - Universally Unique Identifiers
+-- Array - Stores an array of strings, numbers, etc
+-- JSON
+-- Hstore key-value pair
+-- network address
+-- geometric data 
+
+-- When creating databases and tables, one should pay careful consideration to the data types to be used for the data to be stored -- SQL documentation has more information. 
+-- Always search for best practices online for how to store data. For instance, phone numbers should rather be stored as a 'varchar' and not an integer.
+
+
+------ PRIMARY KEY [PK]
+-- A 'Primary Key' is a column or group of columns used to uniquely identify a row in a table. Examples could be 'customer_id', 'student_id', 'member_id'. These are things that aren't duplicated.
+
+
+------ FOREIGN KEY
+-- A 'Foreign Key' is a field or group of fields in a table that uniquely identifies a row in another table.
+-- A 'Foreign Key' is defined in a table that references to the 'Primary Key' of the other table.
+-- The table that contains the 'Foreign Key' is called the 'referencing table' or 'child table'.
+-- The table being referenced by the 'Foreign Key' is called the 'referenced table' or 'parent table'.
+
+-- NOTE that 'Foreign Keys' are identified as constraints on a particular table. Where the 'Primary Keys' are highlighted with a single golden key symbol, the 'Foreign Keys' have an unhighlighted dual key.  
+
+
+------ CONSTRAINTS
+-- 'Constraints' are the rules enforced on data columns on table.
+-- 'Constraints' are used to prevent invalid data from being entered into a database.
+-- There are 'Column Constraints' and 'Table Constraints'
+
+-- COMMON CONSTRAINTS are expounded, below -- Note that these constraints, as much as they can be applied on single columns, they can also be applied on entire tables as CONSTRAINT(column_1):
+-- NOT NULL: Ensures that a column cannot have a NULL value - Such as ID numbers for students in a school.
+-- UNIQUE: Ensures that all values in a column are different - Such as emails for customers in a database.
+-- PRIMARY KEY
+-- FOREIGN KEY
+-- CHECK: Ensures that all values in a column satisfy certain conditions.
+-- EXCLUSION: Ensures that if any two rows are compared on the specified column or expression using the specified operator, not all of these comparisons will return TRUE.
+
+
+------------------------ The 'CREATE' keyword
+-- Generally used to create tables, the syntax is shown below:
+CREATE TABLE table_name(
+	column_name1 TYPE column_constraint1,
+	column_name2 TYPE column_constraint2,
+	table_constraint, table_constraint
+) INHERITS existing_table_name;
+
+-- NOTE that if you have unique data that exists serially (i.e: 1,2,3,...), you would not be required to provide a value.
+
+-- Example 1:
+-- Creating a simple sample table in a database for 'brothers house'.
+CREATE TABLE brothers_house( -- 'brothers_house' is the table name, here.
+	brother_serial SERIAL PRIMARY KEY UNIQUE, -- First column titled 'brother_serial' is a SERIAL type (1,2,3,...), the constraints are PK and UNIQUE
+	bro_name VARCHAR(50) NOT NULL, -- second column titled 'bro_name' is a VARCHAR type with allowable 50 characters, the constraint here is NOT NULL
+	bro_age SMALLINT NOT NULL, -- Third column titled 'bro_age' is a SMALLINT type, the constraint here is NOT NULL
+	bro_nationality VARCHAR(30) NOT NULL, -- Fourth column titled 'bro_nationality' is a VARCHAR type with allowable 30 characters, the constraint here is NOT NULL
+	created_on TIMESTAMP NOT NULL -- Fifth column titled 'created_on' is a TIMESTAMP type, the constraint here is NOT NULL
+); -- Notice I did not use any table constraints or inheritances, because these are optional.
+
+-- Creating another simple table for school information in the Quebec province.
+CREATE TABLE quebec_school(
+	school_id SERIAL PRIMARY KEY UNIQUE,
+	school_name VARCHAR(60) NOT NULL,
+	school_city VARCHAR(30) NOT NULL
+);
+
+-- A third table is created, having foreign key references to the two previously created tables.
+CREATE TABLE brothers_school(
+	brother_serial SMALLINT REFERENCES brothers_house(brother_serial),
+	school_id SMALLINT REFERENCES quebec_school(school_id),
+	graduation_date TIMESTAMP
+);
+
+
+
+------------------------ The 'INSERT' keyword
+-- The 'INSERT' keyword allows you to insert row data into created/existing tables.
+-- The general syntax for this is shown below:
+INSERT INTO table(column1, column2, ...)
+VALUES
+(value1, value2, ...),
+(value3, value4, ...),...;
+
+-- You may also insert row data into a table from another table. The syntax for this is shown below:
+INSERT INTO table(column1, column2, ...)
+SELECT columnA, columnB, ...
+FROM another_table
+WHERE condition;
+
+-- Example 1:
+-- Populating the prior created tables; 'brothers_house', 'quebec_school', 'brothers_school'
+-- For 'brothers_house' table
+INSERT INTO brothers_house(bro_name, bro_age, bro_nationality, created_on) -- Note that since I indicated that the 'brother_serial' column is of TYPE: SERIAL, it populates automatically (1,2,3,...).
+VALUES
+('Li Cheng', 28, 'Canada', CURRENT_DATE),
+('Dunder Miffy', 21, 'Mexico', CURRENT_DATE),
+('Paris Hilton', 67, 'Ireland', CURRENT_DATE);
+
+-- For 'quebec_school' table
+INSERT INTO quebec_school(school_name, school_city) -- Note that since I indicated that the 'school_id' column is of TYPE: SERIAL, it populates automatically (1,2,3,...).
+VALUES
+('Concordia University', 'Montreal'),
+('McGill University', 'Montreal'),
+('Universite de Montreal', 'Montreal'),
+('Universite de Sherbrooke', 'Longueuil')
+
+-- For 'brothers_school' table
+INSERT INTO brothers_school(brother_serial, school_id, graduation_date)
+VALUES
+(1, 2, CURRENT_DATE), -- NOTE that since row data for 'brother_serial' and 'school_id' are referenced from prior two tables, an error would occur if a value that doesnt exist in them is entered.
+(2, 4, CURRENT_DATE),
+(3, 1, CURRENT_DATE);
+
+
+
+------------------------ The 'UPDATE' keyword
+-- The 'UPDATE' keyword allows for values in the columsn of a table to be changed.
+-- The general syntax is shown below:
+UPDATE table
+SET column1 = value1,
+    column2 = value2,...
+WHERE condition;
+
+-- Example 1:
+UPDATE account
+SET last_login = CURRENT_TIMESTAMP -- updating the data in the 'last_login' column with the current time.
+WHERE last_login IS NULL; -- Adding a condition is totally up to you and you may decide if it is relevant or not.
+
+-- Example 2:
+UPDATE account
+SET last_login = created_on -- updating the data in the 'last_login' column with the data from the 'created_on' column.
+RETURNING account_id, last_login; -- This is optional, and allows for the rows that were updated to be returned.
+
+-- Example 3:
+UPDATE TableA
+SET original_col = TableB.new_column
+FROM TableB
+WHERE TableA.id = TableB.id;
+
+
+
+------------------------ The 'DELETE' keyword
+-- The 'DELETE' keyword may be used to remove rows from a table.
+-- A sample syntax is shown below:
+DELETE FROM table1
+WHERE row_id = 1;
  
- 
- 
+-- Rows from a table may also be deleted based on relations to another table.
+-- The syntax is shown below:
+DELETE FROM table1
+USING table2
+WHERE table1.unique_id = table2.unique_id;
+-- You may also add a 'RETURNING' call to see what was removed from the said table.
+
+-- All rows in a particular table may also be deleted by using the syntax below:
+DELETE FROM table1;
  
  
  
