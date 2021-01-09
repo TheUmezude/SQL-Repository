@@ -840,6 +840,15 @@ CREATE TABLE brothers_school(
 	graduation_date TIMESTAMP
 );
 
+-- SAMPLE syntax for creating a table with the 'CHECK' constraint:
+CREATE TABLE example_table(
+	example_id SERIAL PRIMARY KEY,
+	kid_age SMALLINT CHECK(age>21),
+	parent_age SMALLINT CHECK(parent_age > kid_age)
+);-- Here, we are creatign a table with columns 'example_id', 'kid_age', 'parent_age'. 
+-- We are also applying a CHECK constraint to ensure that the data entered into the 'kid_age' column is greater than the integer 21. 
+-- Then next we apply another CHECK constraint to ensure that the age entered for the parent is greater than that entered for the kid.
+
 
 
 ------------------------ The 'INSERT' keyword
@@ -923,6 +932,69 @@ WHERE table1.unique_id = table2.unique_id;
 
 -- All rows in a particular table may also be deleted by using the syntax below:
 DELETE FROM table1;
+
+
+
+------------------------ The 'ALTER' keyword/clause
+-- The 'ALTER' clause allows for changes to an existing table structure -- such as:
+-- Adding, dropping or renaming columns.
+-- Changing a column's data type.
+-- Setting DEFAULT values for a column.
+-- Adding CHECK constraints.
+-- Renaming a table
+-- The general syntax is shown below:
+ALTER TABLE table_name
+intended_ action; -- This intended action could vary across specific actions to the columns of the table or even to the table itself.
+
+-- Example 1: Renaming a table or column:
+ALTER TABLE table_1
+RENAME TO table_renamed;
+
+ALTER TABLE table_1
+RENAME COLUMN first_column TO column_1;
+
+-- Example 2: Adding columns to a table:
+ALTER TABLE table_name
+ADD COLUMN new_col TYPE ...
+
+-- Example 3: Removing a column from a table:
+ALTER TABLE table_name
+DROP COLUMN column_name;
+-- If a column that is to be dropped has dependencies associated with it, one may also call the 'CASCADE' keyword after the call to drop the column in-order to remove all the dependencies.
+-- Sample is shown below:
+ALTER TABLE table_name
+DROP COLUMN column_name CASCADE;
+-- You may also add an 'IF EXISTS' statement to a call to drop a column in-order to avoid any potential errors if the column doesn't exist.
+-- Sample is shown below:
+ALTER TABLE table_name
+DROP COLUMN IF EXISTS column_name CASCADE;
+-- NOTW that you don't need to drop one column at a time. You may drop multiple columns at once -- As in:
+ALTER TABLE table_name
+DROP COLUMN column_name CASCADE,
+DROP COLUMN column_name2 CASCADE;
+
+-- Example 4: Altering constraints of existing column:
+ALTER TABLE table_name
+ALTER COLUMN column_name
+SET DEFAULT value1
+-- OR
+DROP DEFAULT value1
+-- You may also set or drop constraints
+SET NOT NULL
+-- OR
+DROP NOT NULL
+-- MORE
+ADD CONSTRAINT constraint_name
+
+
+
+
+
+
+
+
+
+
  
  
  
